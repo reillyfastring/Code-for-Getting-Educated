@@ -1,0 +1,43 @@
+#include "FEHLCD.h"
+#include "FEHUtility.h"
+#include "math.h"
+
+int main()
+{
+    float g = .06, t = 0, vy = 0, vx = 3, a = 0, yi = 5, r, xi = 160;
+    while (t==0) {
+    printf("vx: %f\n", vx);
+
+    LCD.Clear();
+    LCD.SetFontColor(BLUEVIOLET);
+    LCD.FillCircle(xi ,yi ,5);
+    Sleep(.0167);
+    if (yi >= 235 || yi >= 229.97 && vy > 0) {
+        vy = -.75*vy;
+    }
+
+    if (xi >= 315 || xi >= (315-vx)) {
+        vx = -.75*vx;
+    }
+    if (xi <= 5 || xi <= (0+vx)) {
+        vx = -.85*vx;
+    }
+
+    printf("vy: %f\n", vy);
+    r = abs(vy);
+    printf("r: %f\n", r);
+    if ((r < 0.1) && (yi >= 229.97)) {
+        vy = 0;
+        vx = 0;
+        yi = 234;
+    }
+    else {
+        vy += g;
+    }
+    yi += vy;
+    xi += vx;
+    LCD.Update();
+    // Never end
+    }
+    return 0;
+}
