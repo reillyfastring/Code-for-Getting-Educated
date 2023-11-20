@@ -1,43 +1,171 @@
-#include "FEHLCD.h"
-#include "FEHUtility.h"
-#include "math.h"
 
-int main()
+
+#include <FEHLCD.h>
+#include <FEHUtility.h>
+#include <time.h>
+
+#define screenHeight 240
+#define screenWidth 320
+
+int main(void)
 {
-    float g = .06, t = 0, vy = 0, vx = 3, a = 0, yi = 5, r, xi = 160;
-    while (t==0) {
-    printf("vx: %f\n", vx);
+    int t = 0;
+    //predefined variables
+    float g = 0, vy = 0, vx = 3, a = 0, yi = 5, xi = 10, p = 0, fps = 165, radius = 5, xdamp = .75;
+    float ydamp = .75, yxdamp = .9, xydamp = .9 ,ballStopThreshold = 0.1, velocitydampen = 4, maxXlaunchV = 7, maxYlaunchV = 7, firstT = 0;
 
-    LCD.Clear();
-    LCD.SetFontColor(BLUEVIOLET);
-    LCD.FillCircle(xi ,yi ,5);
-    Sleep(.0167);
-    if (yi >= 235 || yi >= 229.97 && vy > 0) {
-        vy = -.75*vy;
-    }
+    //undefined variables
+    float x_position, y_position, xposi, yposi, xposf, yposf, vxlaunch, vylaunch, sleepVar, rx, ry, totalTime, lastT, m, x, y, b, c, line1x1 = 160, line1x2 = 320, line1y1 = 240, line1y2 = 0;
+    time_t startime, endtime;
 
-    if (xi >= 315 || xi >= (315-vx)) {
-        vx = -.75*vx;
-    }
-    if (xi <= 5 || xi <= (0+vx)) {
-        vx = -.85*vx;
-    }
 
-    printf("vy: %f\n", vy);
-    r = abs(vy);
-    printf("r: %f\n", r);
-    if ((r < 0.1) && (yi >= 229.97)) {
-        vy = 0;
-        vx = 0;
-        yi = 234;
-    }
-    else {
+    //making gravity stay constant with different fps
+    g = (1/fps)*11.475;
+    sleepVar = 1/fps;
+
+    while (t == 0) {
+
+        /*Starts time of run
+        startime = clock();
+        */
+
+        //clears screen
+        LCD.Clear();
+
+        //draws the circle
+        LCD.FillCircle(xi ,yi ,radius);
+
+        //draws a line
+        LCD.DrawLine(line1x1, line1y1, line1x2, line1y2);
+        LCD.SetBackgroundColor(LIGHTBLUE);
+
+        //essentially frames/second
+        Sleep(sleepVar);
+
+        //collision
+        //bottom screen collision
+        if (((yi >= (screenHeight - radius)) || (yi >= ((screenHeight - radius) - vy))) && vy > 0) {
+            vy = (-1.0*ydamp*vy);
+            vx = (yxdamp*vx);
+        }
+
+        //top screen collision
+        if ((yi <= radius || yi <= (radius-vy)) && (vy < 0)) {
+            vy = (-1.0*ydamp*vy);
+            vx = (yxdamp*vx);
+        }
+
+        //right screen collision
+        if (xi >= (screenWidth-radius) || xi >= (screenWidth-radius-vx) && vx > 0) {
+            vx = (-1.0*xdamp*vx);
+            vy = (xydamp*vy);
+        }
+
+        //left screen collision
+        if (xi <= radius || xi <= (radius-vx) && vx < 0) {
+            vx = (-1.0*xydamp*vx);
+            vy = (xydamp*vy);
+        }
+        
+        //line1 collision
+        m = ((screenHeight-line1y2)-(screenHeight-line1y1))/(line1x2-line1x1);
+        c = (screenHeight-line1y1)-(m*(line1x2-line1x1));
+        x = ((screenHeight - yi) - c)/m;
+        printf("%f\n", x);
+        printf("%f\n", xi);
+        if (xi > (x-radius) || xi > (x-radius-vx)){
+            printf("it collided\n");
+            vx = -1*vx*xdamp;
+            vy = -1*vy*ydamp;
+        }
+        
+
+        //calculates x and y components of speed
+        ry = abs(vy);
+        
+        //makes the ball stop moving once it gets below a certain speed in both components, and near bottom of screen (so it doesnt stall when going from up to down)
+        if ((ry < ballStopThreshold) && (yi >= screenHeight - 10)) {
+            vy = 0;
+            vx = 0;
+            yi = screenHeight - 6;
+        }
+        //keeps the ball under effects of gravity otherwise  
+        else {
         vy += g;
-    }
-    yi += vy;
-    xi += vx;
+        }
+
+        //changes position of circle by velocity for next frame
+        yi += vy;
+        xi += vx;
+
+        //counter for if statement below making it not stall at beginning of game when both components of velocity are 0.
+        p += 1;
+
+        //if statement that detects when the player starts to click and hold mouse if the ball isn't moving and a small amount of time has passed
+        if(LCD.Touch(&x_position, &y_position) == true && vy == 0 && vx == 0 && p > 15){
+
+            //saves first position of mouse
+            xposi = x_position;
+            yposi = y_position;
+
+            //keeps detecting position of mouse until the user stops clicking and then saves final position
+            while(LCD.Touch(&x_position, &y_position) == true){
+                xposf = x_position;
+                yposf = y_position;
+            }
+
+            /*logging initial and final positions for testing
+            printf("The initial coordinates were %f, %f\n", xposi, yposi);
+            printf("The final coordinates were %f, %f\n", xposf, yposf);
+            */
+
+            //makes the velocity a factor of the distance          
+            vxlaunch = ((xposi - xposf)/velocitydampen);
+            vylaunch = ((yposi - yposf)/velocitydampen);
+
+            /*more statistics about recorded velocity and actual velocity
+            printf("vxlaunch: %f\n", vxlaunch);
+            printf("vylaunch: %f\n", vylaunch);
+            printf("vx before: %f\n", vx);
+            printf("vy before: %f\n", vy);
+            */
+
+            //sets radius from original point that the velocity maxes out
+            //if velocity is over max, reduce it down to max
+            if(abs(vxlaunch) >= maxXlaunchV){
+                vx += (maxXlaunchV*(vxlaunch/abs(vxlaunch)));
+            }
+
+            //if not then keep it the same
+            else{
+                vx += vxlaunch;
+            }
+
+            //if velocity is over max, reduce it down to max
+            if(abs(vylaunch) >= maxYlaunchV){
+                vy += (maxYlaunchV*(vylaunch/abs(vylaunch)));
+            }
+
+            //if not then keep it the same
+            else{
+                vy += vylaunch;
+            }
+
+            /*states actual velocities being added to the ball
+            printf("vx after: %f\n", vx);
+            printf("vy after: %f\n", vy);
+            */   
+        }
+
+    //updates screen
+
     LCD.Update();
-    // Never end
+    /*Calculates time in between runs
+    endtime = clock();
+    double totalTime = ((double)endtime)/CLOCKS_PER_SEC; 
+    lastT = firstT - totalTime;
+    firstT = totalTime;
+    printf("endtime: %f\n", lastT);
+    */
     }
-    return 0;
 }
