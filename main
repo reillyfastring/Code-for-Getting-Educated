@@ -1,5 +1,3 @@
-
-
 #include <FEHLCD.h>
 #include <FEHUtility.h>
 #include <time.h>
@@ -7,165 +5,365 @@
 #define screenHeight 240
 #define screenWidth 320
 
+void game(float *ptr);
+void statistics(float *ptr);
+void instructions(float *ptr);
+void credits(float *ptr);
+void makelvl(float *ptr);
+
+
 int main(void)
 {
-    int t = 0;
-    //predefined variables
-    float g = 0, vy = 0, vx = 3, a = 0, yi = 5, xi = 10, p = 0, fps = 165, radius = 5, xdamp = .75;
-    float ydamp = .75, yxdamp = .9, xydamp = .9 ,ballStopThreshold = 0.1, velocitydampen = 4, maxXlaunchV = 7, maxYlaunchV = 7, firstT = 0;
 
-    //undefined variables
-    float x_position, y_position, xposi, yposi, xposf, yposf, vxlaunch, vylaunch, sleepVar, rx, ry, totalTime, lastT, m, x, y, b, c, line1x1 = 160, line1x2 = 320, line1y1 = 240, line1y2 = 0;
-    time_t startime, endtime;
+   bool p = true;
+   int xadress, yadress;
+   float gametrue = 0, stattrue = 0, instructtrue = 0, creditstrue = 0;
+   float* gameptr = &(gametrue);
+   float* statptr = &(stattrue);
+   float* creditptr = &(creditstrue);
+   float* instructptr = &(instructtrue);
+   do {
+        Sleep(.01);
+        LCD.Clear();
+        LCD.SetFontColor(GREEN);
+        LCD.FillRectangle(10, 187, 300, 45);
+        LCD.FillRectangle(10, 127, 300, 45);
+        LCD.FillRectangle(10, 67, 300, 45);
+        LCD.FillRectangle(10, 7, 300, 45);
+        LCD.SetBackgroundColor(LIGHTBLUE);
+        LCD.SetFontColor(WHITE);
+        LCD.WriteAt("Play Game", 105, 200);
+        LCD.WriteAt("Statistics", 100, 140);
+        LCD.WriteAt("Instructions", 85, 80);
+        LCD.WriteAt("Credits", 112, 20);
+        LCD.Update();
+        
 
+        if (LCD.Touch(&xadress, &yadress) == true) {
+            if ((xadress > 10 && xadress < 310) && (yadress < 232 && yadress > 187)) {
+                gametrue = 1;
+                Sleep(.25);
+            }
+        }
 
-    //making gravity stay constant with different fps
-    g = (1/fps)*11.475;
-    sleepVar = 1/fps;
+        if (LCD.Touch(&xadress, &yadress) == true) {
+            if ((xadress > 10 && xadress < 310) && (yadress < 172 && yadress > 127)) {
+            stattrue = 1;
+            Sleep(.25);
+            }
+        }
 
-    while (t == 0) {
+        if (LCD.Touch(&xadress, &yadress) == true) {
+            if ((xadress > 10 && xadress < 310) && (yadress < 112 && yadress > 67)) {
+            instructtrue = 1;
+            Sleep(.25);
+            }
+        }
 
-        /*Starts time of run
-        startime = clock();
+        if (LCD.Touch(&xadress, &yadress) == true) {
+            if ((xadress > 10 && xadress < 310) && (yadress < 52 && yadress > 7)) {
+            creditstrue = 1;
+            Sleep(.25);
+            }
+        }
+        game(gameptr);
+        gametrue = 0;
+        statistics(statptr);
+        stattrue = 0;
+        instructions(instructptr);
+        instructtrue = 0;
+        credits(creditptr);
+        creditstrue = 0;
+
+   } while (p == true);
+}
+
+void game(float *gameprt) {
+    while (*gameprt == 1) {
+        int t = 0;
+        float *mat1ptr;
+        /*
+        //predefined variables
+        float g = 0, vy = 0, vx = -3, a = 0, yi = 5, xi = 10, p = 0, fps = 60, radius = 5, xdamp = .75;
+        float ydamp = .75, yxdamp = .9, xydamp = .9 ,ballStopThreshold = 0.1, velocitydampen = 4, maxXlaunchV = 7, maxYlaunchV = 7, firstT = 0;
+
+        //undefined variables
+        float x_position, y_position, xposi, yposi, xposf, yposf, vxlaunch, vylaunch, sleepVar, rx, ry, totalTime, lastT, m, x, y, b, c, line1x1 = 160, line1x2 = 320, line1y1 = 240, line1y2 = 0;
+        time_t startime, endtime;
+
+        //making gravity stay constant with different fps
+        g = (1/fps)*20; //11.475
+        sleepVar = 1/fps;
         */
 
-        //clears screen
-        LCD.Clear();
+        while (t == 0) {
 
-        //draws the circle
-        LCD.FillCircle(xi ,yi ,radius);
+            //Starts time of run
+            //startime = clock();
+            
+            LCD.SetFontColor(RED);
+            //clears screen
+            LCD.Clear();
+            makelvl(mat1ptr);
+            for (int i = 0; i<100; i++) {
+                printf("working");
+                LCD.DrawPixel(*(mat1ptr+i), *(mat1ptr+i+1));
+            }
+            Sleep(.5);
 
-        //draws a line
-        LCD.DrawLine(line1x1, line1y1, line1x2, line1y2);
-        LCD.SetBackgroundColor(LIGHTBLUE);
+            //draws the x in top left corner
+            /*LCD.SetFontColor(RED);
+            LCD.DrawLine(1, 6, 6, 1);
+            LCD.DrawLine(1, 1, 6, 6);
+           // LCD.WriteAt((int)vx, 10, 50);
 
-        //essentially frames/second
-        Sleep(sleepVar);
 
-        //collision
-        //bottom screen collision
-        if (((yi >= (screenHeight - radius)) || (yi >= ((screenHeight - radius) - vy))) && vy > 0) {
-            vy = (-1.0*ydamp*vy);
-            vx = (yxdamp*vx);
-        }
+            //draws the circle
+            LCD.SetFontColor(GREEN);
+            LCD.FillCircle(xi ,yi ,radius);
 
-        //top screen collision
-        if ((yi <= radius || yi <= (radius-vy)) && (vy < 0)) {
-            vy = (-1.0*ydamp*vy);
-            vx = (yxdamp*vx);
-        }
+            //draws a line
+            LCD.SetFontColor(WHITE);
+            LCD.DrawLine(line1x1, line1y1, line1x2, line1y2);
+            LCD.SetBackgroundColor(LIGHTBLUE);
 
-        //right screen collision
-        if (xi >= (screenWidth-radius) || xi >= (screenWidth-radius-vx) && vx > 0) {
-            vx = (-1.0*xdamp*vx);
-            vy = (xydamp*vy);
-        }
+            //essentially frames/second
+            Sleep(sleepVar);
 
-        //left screen collision
-        if (xi <= radius || xi <= (radius-vx) && vx < 0) {
-            vx = (-1.0*xydamp*vx);
-            vy = (xydamp*vy);
-        }
-        
-        //line1 collision
-        m = ((screenHeight-line1y2)-(screenHeight-line1y1))/(line1x2-line1x1);
-        c = (screenHeight-line1y1)-(m*(line1x2-line1x1));
-        x = ((screenHeight - yi) - c)/m;
-        printf("%f\n", x);
-        printf("%f\n", xi);
-        if (xi > (x-radius) || xi > (x-radius-vx)){
-            printf("it collided\n");
-            vx = -1*vx*xdamp;
-            vy = -1*vy*ydamp;
-        }
-        
-
-        //calculates x and y components of speed
-        ry = abs(vy);
-        
-        //makes the ball stop moving once it gets below a certain speed in both components, and near bottom of screen (so it doesnt stall when going from up to down)
-        if ((ry < ballStopThreshold) && (yi >= screenHeight - 10)) {
-            vy = 0;
-            vx = 0;
-            yi = screenHeight - 6;
-        }
-        //keeps the ball under effects of gravity otherwise  
-        else {
-        vy += g;
-        }
-
-        //changes position of circle by velocity for next frame
-        yi += vy;
-        xi += vx;
-
-        //counter for if statement below making it not stall at beginning of game when both components of velocity are 0.
-        p += 1;
-
-        //if statement that detects when the player starts to click and hold mouse if the ball isn't moving and a small amount of time has passed
-        if(LCD.Touch(&x_position, &y_position) == true && vy == 0 && vx == 0 && p > 15){
-
-            //saves first position of mouse
-            xposi = x_position;
-            yposi = y_position;
-
-            //keeps detecting position of mouse until the user stops clicking and then saves final position
-            while(LCD.Touch(&x_position, &y_position) == true){
-                xposf = x_position;
-                yposf = y_position;
+            if (LCD.Touch(&x_position, &y_position) == true) {
+                if (x_position < 5 && y_position < 5) {
+                        *gameprt = 0;
+                        t = 1;
+                    }
+            }
+            
+            //collision
+            //bottom screen collision
+            if (((yi >= (screenHeight - radius)) || (yi >= ((screenHeight - radius) - vy))) && vy > 0) {
+                vy = (-1.0*ydamp*vy);
+                vx = (yxdamp*vx);
             }
 
-            /*logging initial and final positions for testing
-            printf("The initial coordinates were %f, %f\n", xposi, yposi);
-            printf("The final coordinates were %f, %f\n", xposf, yposf);
+            //top screen collision
+            if ((yi <= radius || yi <= (radius-vy)) && (vy < 0)) {
+                vy = (-1.0*ydamp*vy);
+                vx = (yxdamp*vx);
+            }
+
+            //right screen collision
+            if (xi >= (screenWidth-radius) || xi >= (screenWidth-radius-vx) && vx > 0) {
+                vx = (-1.0*xdamp*vx);
+                vy = (xydamp*vy);
+            }
+
+            //left screen collision
+            if (xi <= radius || xi <= (radius-vx) && vx < 0) {
+                vx = (-1.0*xydamp*vx);
+                vy = (xydamp*vy);
+            }
+            
+            //line1 collision
+            m = ((screenHeight-line1y2)-(screenHeight-line1y1))/(line1x2-line1x1);
+            c = (screenHeight-line1y1)-(m*(line1x2-line1x1));
+            x = ((screenHeight - yi) - c)/m;
+            //printf("%f\n", x);
+            //printf("%f\n", xi);
+            if (xi > (x-radius) || xi > (x-radius-vx)){
+            // printf("it collided\n");
+                vx = -1*vx*xdamp;
+                vy = -1*vy*ydamp;
+            }
+            
+
+            //calculates x and y components of speed
+            ry = abs(vy);
+            
+            //makes the ball stop moving once it gets below a certain speed in both components, and near bottom of screen (so it doesnt stall when going from up to down)
+            if ((ry < ballStopThreshold) && (yi >= screenHeight - 10)) {
+                vy = 0;
+                vx = 0;
+                yi = screenHeight - 6;
+            }
+            //keeps the ball under effects of gravity otherwise  
+            else {
+            vy += g;
+            }
+
+            //changes position of circle by velocity for next frame
+            yi += vy;
+            xi += vx;
+
+            //counter for if statement below making it not stall at beginning of game when both components of velocity are 0.
+            p += 1;
+
+            //if statement that detects when the player starts to click and hold mouse if the ball isn't moving and a small amount of time has passed
+            if(LCD.Touch(&x_position, &y_position) == true && vy == 0 && vx == 0 && p > 15){
+
+                //saves first position of mouse
+                xposi = x_position;
+                yposi = y_position;
+
+            
+                
+                //keeps detecting position of mouse until the user stops clicking and then saves final position
+                while(LCD.Touch(&x_position, &y_position) == true){
+                    xposf = x_position;
+                    yposf = y_position;
+                }
+                //logging initial and final positions for testing
+                //printf("The initial coordinates were %f, %f\n", xposi, yposi);
+                //printf("The final coordinates were %f, %f\n", xposf, yposf);
+                //
+
+                //makes the velocity a factor of the distance          
+                vxlaunch = ((xposi - xposf)/velocitydampen);
+                vylaunch = ((yposi - yposf)/velocitydampen);
+
+                //more statistics about recorded velocity and actual velocity
+                //printf("vxlaunch: %f\n", vxlaunch);
+                //printf("vylaunch: %f\n", vylaunch);
+                //printf("vx before: %f\n", vx);
+                //printf("vy before: %f\n", vy);
+                //
+
+                //sets radius from original point that the velocity maxes out
+                //if velocity is over max, reduce it down to max
+                if(abs(vxlaunch) >= maxXlaunchV){
+                    vx += (maxXlaunchV*(vxlaunch/abs(vxlaunch)));
+                }
+
+                //if not then keep it the same
+                else{
+                    vx += vxlaunch;
+                }
+
+                //if velocity is over max, reduce it down to max
+                if(abs(vylaunch) >= maxYlaunchV){
+                    vy += (maxYlaunchV*(vylaunch/abs(vylaunch)));
+                }
+
+                //if not then keep it the same
+                else{
+                    vy += vylaunch;
+                }
+
+                //states actual velocities being added to the ball
+                //printf("vx after: %f\n", vx);
+                //printf("vy after: %f\n", vy);
+                //   
+                
+            }
             */
 
-            //makes the velocity a factor of the distance          
-            vxlaunch = ((xposi - xposf)/velocitydampen);
-            vylaunch = ((yposi - yposf)/velocitydampen);
+        //updates screen
 
-            /*more statistics about recorded velocity and actual velocity
-            printf("vxlaunch: %f\n", vxlaunch);
-            printf("vylaunch: %f\n", vylaunch);
-            printf("vx before: %f\n", vx);
-            printf("vy before: %f\n", vy);
-            */
-
-            //sets radius from original point that the velocity maxes out
-            //if velocity is over max, reduce it down to max
-            if(abs(vxlaunch) >= maxXlaunchV){
-                vx += (maxXlaunchV*(vxlaunch/abs(vxlaunch)));
-            }
-
-            //if not then keep it the same
-            else{
-                vx += vxlaunch;
-            }
-
-            //if velocity is over max, reduce it down to max
-            if(abs(vylaunch) >= maxYlaunchV){
-                vy += (maxYlaunchV*(vylaunch/abs(vylaunch)));
-            }
-
-            //if not then keep it the same
-            else{
-                vy += vylaunch;
-            }
-
-            /*states actual velocities being added to the ball
-            printf("vx after: %f\n", vx);
-            printf("vy after: %f\n", vy);
-            */   
+        LCD.Update();
+        //Calculates time in between runs
+        //endtime = clock();
+        //double totalTime = ((double)endtime)/CLOCKS_PER_SEC; 
+        //lastT = firstT - totalTime;
+        //firstT = totalTime;
+        //printf("endtime: %f\n", lastT);
+        
         }
-
-    //updates screen
-
-    LCD.Update();
-    /*Calculates time in between runs
-    endtime = clock();
-    double totalTime = ((double)endtime)/CLOCKS_PER_SEC; 
-    lastT = firstT - totalTime;
-    firstT = totalTime;
-    printf("endtime: %f\n", lastT);
-    */
     }
+}
+
+void statistics(float *statptr) {
+    if (*statptr == 1) {
+        int t = 1, xadress, yadress;
+        while (t == 1) {
+            LCD.Clear();
+            LCD.SetFontColor(GREEN);
+            LCD.FillRectangle(10, 185, 300, 45);
+            LCD.SetBackgroundColor(LIGHTBLUE);
+            LCD.SetFontColor(WHITE);
+            LCD.WriteAt("Back", 130, 198);
+            LCD.WriteAt("Max Height: ", 5, 10);
+            LCD.WriteAt("Number of Summits: ", 5, 40);
+            LCD.WriteAt("Shortest Summit Time: ", 5, 70);
+            LCD.WriteAt("Longest Fall: ", 5, 100);
+            LCD.Update();
+            Sleep(.01);
+            if (LCD.Touch(&xadress, &yadress) == true) {
+                if ((xadress > 10 && xadress < 310) && (yadress < 230 && yadress > 185)) {
+                t = 0;
+                Sleep(.25);
+                }
+            }
+        }
+    }
+}
+
+void instructions(float *instructptr) {
+    if (*instructptr == 1) {
+        int t = 1, xadress, yadress;
+        while (t == 1) {
+            LCD.Clear();
+            LCD.SetFontColor(GREEN);
+            LCD.FillRectangle(10, 185, 300, 45);
+            LCD.SetBackgroundColor(LIGHTBLUE);
+            LCD.SetFontColor(WHITE);
+            LCD.WriteAt("Back", 130, 198);
+            LCD.WriteAt("Just get to the top. No", 15, 10);
+            LCD.WriteAt("one said it would be easy.", 5, 40);
+            LCD.WriteAt("Touch and hold to launch.", 10, 70);
+            LCD.WriteAt("Some parts are more", 40, 100);
+            LCD.WriteAt("slippery than others.", 35, 130);
+            LCD.WriteAt("Don't fall!", 85, 160);
+            LCD.Update();
+            Sleep(.01);
+            if (LCD.Touch(&xadress, &yadress) == true) {
+                if ((xadress > 10 && xadress < 310) && (yadress < 230 && yadress > 185)) {
+                t = 0;
+                Sleep(.25);
+                }
+            }
+        }
+    }
+}
+
+void credits(float *creditsptr) {
+    if (*creditsptr == 1) {
+        int t = 1, xadress, yadress;
+        while (t == 1) {
+            LCD.Clear();
+            LCD.SetFontColor(GREEN);
+            LCD.FillRectangle(10, 185, 300, 45);
+            LCD.SetBackgroundColor(LIGHTBLUE);
+            LCD.SetFontColor(WHITE);
+            LCD.WriteAt("Back", 130, 198);
+            LCD.WriteAt("\"Getting Over it Lyte\" was", 5, 10);
+            LCD.WriteAt("created by Reilly Fastring", 5, 40);
+            LCD.WriteAt("and Cameron Arnold.", 50, 70);
+            LCD.Update();
+            Sleep(.01);
+            if (LCD.Touch(&xadress, &yadress) == true) {
+                if ((xadress > 10 && xadress < 310) && (yadress < 230 && yadress > 185)) {
+                t = 0;
+                Sleep(.25);
+                }
+            }
+        }
+    }
+}
+
+void makelvl(float *mat1ptr) {
+    int t = 0, i = 0;
+    float matrix1[100][2], xp, yp;
+    mat1ptr = &matrix1[0][0];
+    while (t == 0) {
+
+        while(LCD.Touch(&xp, &yp)==true) {
+            *(mat1ptr + i) = xp;            
+            *(mat1ptr + i + 1) = yp;
+            printf("%f, %f\n", *(mat1ptr+i), *(mat1ptr + i + 1));
+            i++;
+        }
+        if (i > 100) {
+            t = 1;
+            printf("done");
+        }
+    }
+    
 }
