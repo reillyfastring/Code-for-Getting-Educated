@@ -212,7 +212,7 @@ void game(float *gameprt) {
         //collision variables
         float speed, minN, distance, matrix2[25], f = 0;
         bool e = false, z = false, gravbool = true;
-        int samecheck, *mat1ptr, counter = 0;
+        int samecheck, *mat1ptr;
         //collision pointers
 
         float *xiptr, *yiptr, *vxptr, *vyptr, *radptr, *speedptr, *minNptr, *distanceptr, *mat2ptr, *fptr;
@@ -252,6 +252,7 @@ void game(float *gameprt) {
 
             //draws all objects on screen
             drawScreen(mat1ptr, radptr, xiptr, yiptr);
+            //Sleep(35);
             /*
             //essentially frames/second
             if (counter == 4) {
@@ -382,11 +383,79 @@ void drawScreen(int *mat1ptr, float *radptr, float *xiptr, float *yiptr) {
 };
 
 void collision(float *yiptr, float* xiptr, float* radptr, float* vxptr, float* vyptr, int* mat1ptr, float* speedptr, float *minNptr, float *distanceptr, float *mat2ptr, float *fptr, int* samecheckptr, bool* eptr, bool* zptr, bool* gravboolptr) {
+    
+    //map collision
+    float xdamp = .75, ydamp = .75, c, g, h, slopeavg, rise1, rise2, rise3, rise4, run1, run2, run3, run4, slope1, slope2, slope3, slope4;
+    int b, counter, counter2;
+
+    //calculates speed
+    *speedptr = sqrt(pow(*vxptr, 2)+pow(*vyptr, 2));
+
+    g = 100;
+   *distanceptr = 0;
+    for (int i = 0; i<500; i++) {
+            *distanceptr = sqrt(pow((*xiptr-*(mat1ptr+2*i)),2)+pow((*yiptr-*(mat1ptr+2*i+1)),2));
+            if (*distanceptr < *radptr+*speedptr) {
+                if (*distanceptr < g) {
+                *zptr = true;
+                b = i;
+                //printf("check: %f\n", *distanceptr);
+                g = *distanceptr;
+                }
+            }
+    }
+
+    rise1 = *(mat1ptr+2*b-8+1)-*(mat1ptr+2*b+8+1);
+    run1 = *(mat1ptr+2*b+8)-*(mat1ptr+2*b-8);
+    slope1 = rise1/run1;
+    rise2 = *(mat1ptr+2*b-10+1)-*(mat1ptr+2*b+10+1);
+    run2 = *(mat1ptr+2*b+10)-*(mat1ptr+2*b-10);
+    slope2 = rise2/run2;
+    rise3 = *(mat1ptr+2*b-12+1)-*(mat1ptr+2*b+12+1);
+    run3 = *(mat1ptr+2*b+12)-*(mat1ptr+2*b-12);
+    slope3 = rise3/run3;
+    rise4 = *(mat1ptr+2*b-14+1)-*(mat1ptr+2*b+14+1);
+    run4 = *(mat1ptr+2*b+14)-*(mat1ptr+2*b-14);
+    slope4 = rise4/run4;
+    slopeavg = (slope1+slope2+slope3+slope4)/4;
+    
+
+    //printf("break\n");
+    if (*zptr == true && *speedptr < 1) {
+        *vxptr = 0;
+        *vyptr = 0;
+        *zptr = false;
+        *fptr = 0;
+        *gravboolptr = false;
+        *yiptr -= *radptr;
+        if ((*xiptr-*(mat1ptr+2*b))>0 && *xiptr < 315) {
+            *xiptr += *radptr;
+        }
+        else if ((*xiptr-*(mat1ptr+2*b))<0) {
+            *xiptr -= *radptr;
+        }
+        else {
+
+        }
+        printf("Slope: %f\n", slopeavg);
+    }
+
+    else if (*zptr == true) {
+        *vxptr = -1*(*vxptr)*xdamp;
+        *vyptr = -1*(*vyptr)*ydamp;
+        *zptr = false;
+        *fptr = 0;
+        printf("Slope: %f\n", slopeavg);
+    }
+
+    if (*xiptr + *radptr > 320) {
+        *xiptr = 320-*radptr;
+    }
 
     //bottom screen collision
     float walldamp = 0.9;
 
-    if (((*yiptr >= (screenHeight - *radptr)) || (*yiptr >= ((screenHeight - *radptr) - *vyptr))) && *vyptr > 0) {
+    if (((*yiptr >= (screenHeight - *radptr)) || (*yiptr >= ((screenHeight - *radptr) - *vyptr))) && *vyptr > 0)  {
         *vyptr = (-1.0*walldamp*(*vyptr));
         *vxptr = (walldamp*(*vxptr));
     }
@@ -407,36 +476,6 @@ void collision(float *yiptr, float* xiptr, float* radptr, float* vxptr, float* v
     if (*xiptr <= *radptr || *xiptr <= (*radptr-*vxptr) && *vxptr < 0) {
         *vxptr = (-1.0*walldamp*(*vxptr));
         *vyptr = (walldamp*(*vyptr));
-    }
-    
-    //map collision
-    float xdamp = .75, ydamp = .75, b, c, g, h;
-
-    //calculates speed
-    *speedptr = sqrt(pow(*vxptr, 2)+pow(*vyptr, 2));
-    
-   *distanceptr = 0;
-    for (int i = 0; i<500; i++) {
-            *distanceptr = sqrt(pow((*xiptr-*(mat1ptr+2*i)),2)+pow((*yiptr-*(mat1ptr+2*i+1)),2));
-            if (*distanceptr < *speedptr) {
-                *zptr = true;
-            }
-    }
-
-    if (*zptr == true && *speedptr < 1) {
-        *vxptr = 0;
-        *vyptr = 0;
-        *zptr = false;
-        *fptr = 0;
-        *gravboolptr = false;
-        *yiptr -= *radptr;
-    }
-
-    else if (*zptr == true) {
-        *vxptr = -1*(*vxptr)*xdamp;
-        *vyptr = -1*(*vyptr)*ydamp;
-        *zptr = false;
-        *fptr = 0;
     }
 };
 
