@@ -402,10 +402,10 @@ void collision(float *yiptr, float* xiptr, float* radptr, float* vxptr, float* v
         *vxptr = (-1.0*walldamp*(*vxptr));
         *vyptr = (walldamp*(*vyptr));
     }
-
+    
     //map collision
     float xdamp = .75, ydamp = .75, b, c, g, h;
-
+    /*
     //initial ground detection
     for (int j = 0; j<25; j++) {
         b = *(mat1ptr+40*j);
@@ -415,8 +415,10 @@ void collision(float *yiptr, float* xiptr, float* radptr, float* vxptr, float* v
         *(mat2ptr+j) = *distanceptr;
         //printf("check1, distnace: %f\n", distance);
     }
+    */
     //checking if close
     *speedptr = sqrt(pow(*vxptr, 2)+pow(*vyptr, 2));
+    /*
     *minNptr = 100;
     for (int k = 0; k < 25; k++) {
         //printf("check2, minN: %f, distance: %f\n", minN, matrix2[k]);
@@ -448,6 +450,14 @@ void collision(float *yiptr, float* xiptr, float* radptr, float* vxptr, float* v
                 *zptr = true;
                 //printf("check6\n");
             }
+        }
+    }
+    */
+   *distanceptr = 0;
+   for (int i = 0; i<500; i++) {
+        *distanceptr = sqrt(pow((*xiptr-*(mat1ptr+2*i)),2)+pow((*yiptr-*(mat1ptr+2*i+1)),2));
+        if (*distanceptr < *speedptr) {
+            *zptr = true;
         }
     }
 
