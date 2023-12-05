@@ -1437,7 +1437,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
     }
 
     //big if else statement chain that first detects which level it is on, and then picks the respective action depending on which border has been hit and which map it is on.
-    if (*mapptr == 1) {
+    switch (*mapptr) {
+        case 1:
         switch (*LevelTrackerptr) {
             case 1:
             *vyptr = (-1.0*walldamp*(*vyptr));
@@ -1461,8 +1462,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 1;
             break;
         }
-    }
-    else if (*mapptr == 2) {
+        break;
+        case 2:
         switch (*LevelTrackerptr) {
             case 1:
             *vyptr = (-1.0*walldamp*(*vyptr));
@@ -1487,8 +1488,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 1;
             break;
         }
-    }
-    else if (*mapptr == 3) {
+        break;
+        case 3:
         switch (*LevelTrackerptr) {
             case 2:
             *mapptr = 5;
@@ -1509,8 +1510,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 2;
             break;
         }
-    }
-    else if (*mapptr == 4) {
+        break;
+        case 4:
         switch (*LevelTrackerptr) {
             case 2:
             *mapptr = 6;
@@ -1525,8 +1526,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 3;
             break;
         }
-    }
-    else if (*mapptr == 5) {
+        break;
+        case 5:
         switch (*LevelTrackerptr) {
             case 1:
             *mapptr = 3;
@@ -1551,8 +1552,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 5;
             break;
         }
-    }
-    else if (*mapptr == 6) {
+        break;
+        case 6:
         switch (*LevelTrackerptr) {
             case 1:
             *mapptr = 4;
@@ -1578,8 +1579,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 5;
             break;
         }
-    }
-    else if (*mapptr == 7) {
+        break;
+        case 7:
         switch (*LevelTrackerptr) {
             case 2:
             *mapptr = 8;
@@ -1594,8 +1595,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 6;
             break;
         }
-    }
-    else if (*mapptr == 8) {
+        break;
+        case 8:
         switch (*LevelTrackerptr) {
             case 1:
             *mapptr = 7;
@@ -1619,8 +1620,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 8;
             break;
         }
-    }
-    else if (*mapptr == 9) {
+        break;
+        case 9:
         switch (*LevelTrackerptr) {
             case 2:
             *mapptr = 10;
@@ -1635,8 +1636,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 8;
             break;
         }
-    }
-    else if (*mapptr == 10) {
+        break;
+        case 10:
         switch (*LevelTrackerptr) {
             case 1:
             *mapptr = 9;
@@ -1661,8 +1662,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 10;
             break;
         }
-    }
-    else if (*mapptr == 11) {
+        break;
+        case 11:
         switch (*LevelTrackerptr) {
             case 2:
             *mapptr = 13;
@@ -1677,8 +1678,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 10;
             break;
         }
-    }
-    else if (*mapptr == 12) {
+        break;
+        case 12:
         switch (*LevelTrackerptr) {
             case 1:
             *mapptr = 10;
@@ -1703,8 +1704,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 12;
             break;
         }
-    }
-    else if (*mapptr == 13) {
+        break;
+        case 13:
         switch (*LevelTrackerptr) {
             case 1:
             *mapptr = 11;
@@ -1725,8 +1726,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 12;
             break;
         }
-    }
-    else if (*mapptr == 14) {
+        break;
+        case 14:
         switch (*LevelTrackerptr) {
             case 1:
             *mapptr = 13;
@@ -1751,8 +1752,8 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 14;
             break;
         }
-    }
-    else if (*mapptr == 15) {
+        break;
+        case 15:
         switch (*LevelTrackerptr) {
             case 2:
             *vyptr = (-1.0*walldamp*(*vyptr));
@@ -1766,6 +1767,7 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
             return 14;
             break;
         }
+        break;
     }
     
     //resets level tracker
