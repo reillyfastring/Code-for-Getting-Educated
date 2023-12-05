@@ -390,9 +390,6 @@ void game(float *gameprt, int *maxheightptr, int *NOSptr, bool *summittrueptr, f
         //makes the game run from the menu
         float makelvl2 = 0;
         float *makelvlptr = &makelvl2;
-
-        //declaring timer for statistics
-        clock_t start = clock();
         
         //predefined variables for game
         float gravity = 0, vy = 0, vx = 0, a = 0, yi = 30, xi = 100, p = 0, fps = 164, radius = 4, totalTime = 0;
@@ -432,6 +429,7 @@ void game(float *gameprt, int *maxheightptr, int *NOSptr, bool *summittrueptr, f
         samecheckptr = &samecheck;
         LevelTrackerptr = &LevelTracker;
         mapptr = &map;
+        int counter = 0;
         
         //making gravity constant depending on how often screen is displayed
         gravity = (1/fps)*20; //11.475
@@ -439,7 +437,7 @@ void game(float *gameprt, int *maxheightptr, int *NOSptr, bool *summittrueptr, f
         
         //main while loop
         while (*gameloopptr == 0) {
-
+            
             //Detects max height throughout all levels and converts it to feet
             if (*mapptr > 0 || *mapptr < 5) {
                 maxheight = (screenHeight-yi)/240*4838.5;
@@ -467,49 +465,58 @@ void game(float *gameprt, int *maxheightptr, int *NOSptr, bool *summittrueptr, f
             if (map == 15 && yi < 50) {
                 *summittrueptr = true;
             }
-
+            
+            if (counter < 10) {
+                counter++;
+            }
+            if (counter == 10) {
             //detects if the hit to scroll button is pressed and makes the text continue
-            if (LCD.Touch(&x_position, &y_position) == true) {
+            if (LCD.Touch(&x_position, &y_position)) {
                 if ((x_position > 240 && x_position < 321) && (y_position < 36 && y_position > 1)) {
                 text++;
                 Sleep(.25);
                 }
             }
-
+            }
+            
             //uncomment to make a lvl
             //makelvl(mat1ptr, makelvlptr);
 
             //clears screen
             LCD.Clear();
-
+            
             //calls matrix storage function to get matrix for corresponding level
             mat1ptr = MatrixStorage(map, matrix1, matrix2, matrix3, matrix4, matrix5, matrix6, matrix7, matrix8, matrix9, matrix10, matrix11, matrix12, matrix13, matrix14, matrix15);
-
+            
             //draws all objects on screen
+            
             drawScreen(mapptr, radptr, xiptr, yiptr, mat1ptr, speedptr, vxptr, vyptr, leftptr, rightptr);
             TextBox(mapptr, textptr, gameloopptr, gameprt);
-
+            
             //uncomment to make a lvl
             ///*
-
+            clock_t start = clock();
             //exits game
-            if (LCD.Touch(&x_position, &y_position) == true) {
+            if (counter == 10) {
+            if (LCD.Touch(&x_position, &y_position)) {
                 if (x_position < 5 && y_position < 5) {
                         *gameprt = 0;
                         *gameloopptr = 1;
                         *mapptr = 1;
                 }
             }
+            }
+           clock_t end = clock();
             //collision
+                    //declaring timer for statistics
             collision(yiptr, xiptr, radptr, vxptr, vyptr, mat1ptr, speedptr, minNptr, distanceptr, mat2ptr, fptr, samecheckptr, eptr, zptr, gravboolptr, LevelTrackerptr);
             //printf("collision check, ");
-
             //Tracks if the game switches levels
             MapTracker(LevelTrackerptr, mapptr, vxptr, vyptr, xiptr, yiptr, speedptr, textptr);
 
             //calculates x and y components of speed
             ry = abs(vy);
-
+            
             //makes the ball stop moving once it gets below a certain speed in both components, and near bottom of screen (so it doesnt stall when going from up to down)
             if ((ry < ballStopThreshold) && (yi >= screenHeight - 10) && gravbool == true) {
                 vy = 0;
@@ -529,9 +536,10 @@ void game(float *gameprt, int *maxheightptr, int *NOSptr, bool *summittrueptr, f
 
             //counter for if statement below making it not stall at beginning of game when both components of velocity are 0.
             p += 1;
-
+            
+            if (counter == 10) {
             //if statement that detects when the player starts to click and hold mouse if the ball isn't moving and a small amount of time has passed
-            if(LCD.Touch(&x_position, &y_position) == true && vy == 0 && vx == 0 && p > 15 && x_position < 240 && y_position > 36){
+            if(LCD.Touch(&x_position, &y_position) && vy == 0 && vx == 0 && p > 15 && x_position < 240 && y_position > 36){
             
                 //saves first position of mouse
                 xposi = x_position;
@@ -586,19 +594,21 @@ void game(float *gameprt, int *maxheightptr, int *NOSptr, bool *summittrueptr, f
                 left = false;
                 right = false;
             }
-            
+            }
+            if (counter == 10) {
+                counter = 0;
+            }
         //uncomment to create collision for level
         //*/
 
         //updates screen
         LCD.Update();
-        
+        float seconds = (float)(end-start)/CLOCKS_PER_SEC;
+        *timeptr = seconds;
         }
 
         //counting time it takes to summit
-        clock_t end = clock();
-        float seconds = (float)(end-start)/CLOCKS_PER_SEC;
-        *timeptr = seconds;
+
     }
 
     //adds to summit level in statistics
@@ -1867,9 +1877,6 @@ int MapTracker(int *LevelTrackerptr, int *mapptr, float *vxptr, float *vyptr, fl
 
 //main matrix storage function. Takes in level that it should be on from maptracker, and returns an adress of the correct collision matrix
 int* MatrixStorage(int map, int *matrix1, int *matrix2, int *matrix3, int *matrix4, int *matrix5, int *matrix6, int *matrix7, int *matrix8, int *matrix9, int *matrix10, int *matrix11, int *matrix12, int *matrix13, int *matrix14, int *matrix15) {
-
-
-
     //big switch case that actually returns the matrix collision points depending on which map the maptracker function decides it should be on
     switch (map) {
     case 1:
